@@ -66,61 +66,19 @@ enum Token {
     Text(String),
 }
 
-pub fn parse(html: &str) {
-    let mut tag_chars_stack = Vec::<char>::new();
-    let mut txt_chars_stack = Vec::<char>::new();
-    let mut token_stack = Vec::<Token>::new();
-    let mut in_tag_brackets = false;
-    for ch in html.chars() {
-        match ch {
-            '<' => {
-                in_tag_brackets = true;
-                tag_chars_stack.push(ch);
-                // In case of pushing empty text tokens to the stack
-                if txt_chars_stack.len() == 0 {
-                    continue;
-                }
-                // Turn the chars in `txt_chars_stack` in to `String`
-                // and clean the chars stack.
-                let txt_text = String::from_iter(txt_chars_stack);
-                txt_chars_stack = Vec::new();
-                // Push the text we just got to the token stack.
-                token_stack.push(Token::Text(txt_text));
-            }
-            '>' => {
-                in_tag_brackets = false;
-                tag_chars_stack.push(ch);
-                // Turn the chars in `tag_chars_stack` in to `String`
-                // and clean the chars stack.
-                let tag_text = String::from_iter(tag_chars_stack);
-                tag_chars_stack = Vec::new();
-                // Push the tag with the text we just got to the token stack.
-                let tag = Tag::from(tag_text.clone())
-                    .expect(format!("Invalid tag: {}", tag_text).as_str());
-                token_stack.push(Token::Tag(tag));
-            }
-            _ => match in_tag_brackets {
-                true => tag_chars_stack.push(ch),
-                false => txt_chars_stack.push(ch),
-            },
-        }
-    }
-    println!("{:#?}", token_stack);
-}
-
 /// Let's take `<img src="example.png" alt=image>` for example.
 enum AttrPos {
-    /// Here including `src`, `alt`
+    /// This including `src`, `alt`
     Key,
-    /// Here including `=`
+    /// This including `=`
     Equal,
-    /// Here including `example.png`, `image`
+    /// This including `example.png`, `image`
     Value(Option<char>),
-    /// Here including ` `
+    /// This including ` `
     Space,
 }
 
-/// Valid `attr_str` like: `src="example.png" alt=example`
+/// Valid `attr_str` like: `src="example.png" alt=example disabled`
 fn parse_attrs(attr_str: String) -> HashMap<String, String> {
     let mut chars_stack: Vec<char> = Vec::new();
     let mut key_stack: Vec<String> = Vec::new();
@@ -210,7 +168,7 @@ fn parse_attrs(attr_str: String) -> HashMap<String, String> {
     }
 
     if key_stack.len() != value_stack.len() {
-        panic!("{},{:?},{:?}", err_info, key_stack, value_stack)
+        panic!("{}", err_info)
     }
 
     let mut hashmap = HashMap::new();
@@ -222,4 +180,56 @@ fn parse_attrs(attr_str: String) -> HashMap<String, String> {
         );
     }
     hashmap
+}
+
+fn html_to_stack(html: &str) -> Vec<Token> {
+    let mut tag_chars_stack = Vec::<char>::new();
+    let mut txt_chars_stack = Vec::<char>::new();
+    let mut token_stack = Vec::<Token>::new();
+    let mut in_tag_brackets = false;
+    for ch in html.chars() {
+        match ch {
+            '<' => {
+                in_tag_brackets = true;
+                tag_chars_stack.push(ch);
+                // In case of pushing empty text tokens to the stack
+                if txt_chars_stack.len() == 0 {
+                    continue;
+                }
+                // Turn the chars in `txt_chars_stack` in to `String`
+                // and clean the chars stack.
+                let txt_text = String::from_iter(txt_chars_stack);
+                txt_chars_stack = Vec::new();
+                // Push the text we just got to the token stack.
+                token_stack.push(Token::Text(txt_text));
+            }
+            '>' => {
+                in_tag_brackets = false;
+                tag_chars_stack.push(ch);
+                // Turn the chars in `tag_chars_stack` in to `String`
+                // and clean the chars stack.
+                let tag_text = String::from_iter(tag_chars_stack);
+                tag_chars_stack = Vec::new();
+                // Push the tag with the text we just got to the token stack.
+                let tag = Tag::from(tag_text.clone())
+                    .expect(format!("Invalid tag: {}", tag_text).as_str());
+                token_stack.push(Token::Tag(tag));
+            }
+            _ => match in_tag_brackets {
+                true => tag_chars_stack.push(ch),
+                false => txt_chars_stack.push(ch),
+            },
+        }
+    }
+    token_stack
+}
+
+fn stack_to_dom(_: Vec<Token>) {
+    
+}
+
+pub fn parse(html: &str) {
+    let stack = html_to_stack(html);
+    let dom = stack_to_dom(stack);
+    dom
 }
