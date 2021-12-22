@@ -120,6 +120,7 @@ enum AttrPos {
     Space,
 }
 
+/// Valid `attr_str` like: `src="example.png" alt=example`
 fn parse_attrs(attr_str: String) -> HashMap<String, String> {
     let mut chars_stack: Vec<char> = Vec::new();
     let mut key_stack: Vec<String> = Vec::new();
@@ -221,47 +222,4 @@ fn parse_attrs(attr_str: String) -> HashMap<String, String> {
         );
     }
     hashmap
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn paired() {
-        crate::parse(
-            "
-            <header></header>
-            <div>Hello, world!</div>
-            <footer></footer>",
-        );
-    }
-    #[test]
-    fn void() {
-        crate::parse("<div />");
-        crate::parse("<div/>");
-    }
-    #[test]
-    fn self_closing() {
-        crate::parse("<img>");
-    }
-    #[test]
-    fn html_anatomy() {
-        crate::parse(
-            "
-            <!doctype html>
-            <html>
-                <head></head>
-                <body></body>
-            </html>",
-        );
-    }
-    #[test]
-    fn comment() {
-        crate::parse("<!-- comment -->");
-        crate::parse("<!--comment-->");
-    }
-    #[test]
-    fn attributes() {
-        crate::parse("<img src=\"example.png\" alt=example>");
-        crate::parse("<input disabled type=\"button\">");
-    }
 }
