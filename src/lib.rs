@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-#[derive(Debug)]
-enum Tag {
+#[derive(Debug, Clone)]
+enum Token {
     /// Like `<div>`, including `<img>`, `<input>`, etc.
     Start(String, HashMap<String, String>),
     /// Like `</div>`
@@ -12,9 +12,11 @@ enum Tag {
     Doctype,
     /// Like `<!-- comment -->`
     Comment(String),
+    /// Any text
+    Text(String),
 }
 
-impl Tag {
+impl Token {
     fn from(tag: String) -> Option<Self> {
         if tag.ends_with("/>") {
             let tag_name_start = tag[1..tag.len()]
@@ -63,12 +65,29 @@ impl Tag {
     fn from_comment(comment: String) -> Self {
         Self::Comment(comment[4..comment.len() - 3].to_string())
     }
-}
 
-#[derive(Debug)]
-enum Token {
-    Tag(Tag),
-    Text(String),
+    fn to_node(&self) -> Node {
+        match &self {
+            Self::Start(tag_name, attrs) => Node::Element {
+                name: tag_name.clone(),
+                attrs: attrs.clone(),
+                children: Vec::new(),
+            },
+            Self::End(tag_name) => Node::Element {
+                name: tag_name.clone(),
+                attrs: HashMap::new(),
+                children: Vec::new(),
+            },
+            Self::Closing(tag_name, attrs) => Node::Element {
+                name: tag_name.clone(),
+                attrs: attrs.clone(),
+                children: Vec::new(),
+            },
+            Self::Doctype => Node::Doctype,
+            Self::Comment(comment) => Node::Comment(comment.clone()),
+            Self::Text(text) => Node::Text(text.clone()),
+        }
+    }
 }
 
 /// Let's take `<img src="example.png" alt=image>` for example.
@@ -81,6 +100,18 @@ enum AttrPos {
     Value(Option<char>),
     /// This including ` `
     Space,
+}
+
+#[derive(Debug)]
+pub enum Node {
+    Element {
+        name: String,
+        attrs: HashMap<String, String>,
+        children: Vec<Node>,
+    },
+    Text(String),
+    Comment(String),
+    Doctype,
 }
 
 /// Valid `attr_str` like: `src="example.png" alt=example disabled`
@@ -216,8 +247,8 @@ fn html_to_stack(html: &str) -> Vec<Token> {
             if chars_stack[len - 3..len] == ['-', '-', '>'] {
                 let comment = String::from_iter(chars_stack);
                 chars_stack = Vec::new();
-                let tag = Tag::from_comment(comment);
-                token_stack.push(Token::Tag(tag));
+                let tag = Token::from_comment(comment);
+                token_stack.push(tag);
                 in_comment = false;
                 in_brackets = false;
             }
@@ -244,9 +275,9 @@ fn html_to_stack(html: &str) -> Vec<Token> {
                     let tag_text = String::from_iter(chars_stack);
                     chars_stack = Vec::new();
                     // Push the tag with the text we just got to the token stack.
-                    let tag = Tag::from(tag_text.clone())
+                    let tag = Token::from(tag_text.clone())
                         .expect(format!("Invalid tag: {}", tag_text).as_str());
-                    token_stack.push(Token::Tag(tag));
+                    token_stack.push(tag);
                 }
                 '-' => {
                     chars_stack.push(ch);
@@ -270,11 +301,45 @@ fn html_to_stack(html: &str) -> Vec<Token> {
     token_stack
 }
 
-fn stack_to_dom(_: Vec<Token>) {}
+fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
+    let mut nodes = Vec::new();
 
-pub fn parse(html: &str) {
+    let mut i = 0;
+    while i < token_stack.len() {
+        match &token_stack[i] {
+            Token::Start(start_name, attrs) => {
+                let end_pos = token_stack.iter().position(|x| {
+                    if let Token::End(end_name) = x {
+                        start_name == end_name
+                    } else {
+                        false
+                    }
+                });
+                if let Some(j) = end_pos {
+                    // Paired tags like `<p></p>`
+                    let children = stack_to_dom(token_stack[i + 1..j].to_vec());
+                    nodes.push(Node::Element {
+                        name: start_name.clone(),
+                        attrs: attrs.clone(),
+                        children,
+                    });
+                    i = j;
+                } else {
+                    // Unpaired tags like `<img>`
+                    nodes.push(token_stack[i].to_node());
+                }
+            }
+            Token::End(_) => panic!("unexpected end tag"),
+            _ => nodes.push(token_stack[i].to_node()),
+        }
+        i += 1;
+    }
+
+    nodes
+}
+
+pub fn parse(html: &str) -> Vec<Node> {
     let stack = html_to_stack(html);
-    println!("{:#?}", stack);
     let dom = stack_to_dom(stack);
     dom
 }
