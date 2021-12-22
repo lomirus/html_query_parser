@@ -1,5 +1,5 @@
 [package]
-name = "html_query"
+name = "html_query_parser"
 version = "0.1.0"
 edition = "2021"
 

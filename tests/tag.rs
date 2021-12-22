@@ -1,35 +1,35 @@
 #[test]
 fn paired_tag() {
-    html_query::parse("<p></p>");
-    html_query::parse("<div>Hello, world!</div>");
+    html_query_parser::parse("<p></p>");
+    html_query_parser::parse("<div>Hello, world!</div>");
 }
 
 #[test]
 fn void_tag() {
-    html_query::parse("<div />");
-    html_query::parse("<div/>");
+    html_query_parser::parse("<div />");
+    html_query_parser::parse("<div/>");
 }
 
 #[test]
 fn self_closing_tag() {
-    html_query::parse("<img>");
+    html_query_parser::parse("<img>");
 }
 
 #[test]
 fn comment_tag() {
-    html_query::parse("<!-- comment -->");
-    html_query::parse("<!--comment-->");
+    html_query_parser::parse("<!-- comment -->");
+    html_query_parser::parse("<!--comment-->");
 }
 
 #[test]
 fn attributes() {
-    html_query::parse("<img src=\"example.png\" alt=example>");
-    html_query::parse("<input disabled type=\"button\">");
+    html_query_parser::parse("<img src=\"example.png\" alt=example>");
+    html_query_parser::parse("<input disabled type=\"button\">");
 }
 
 #[test]
 fn complex() {
-    html_query::parse(
+    html_query_parser::parse(
         r#"
         <!DOCTYPE html>
         <html lang="en">
