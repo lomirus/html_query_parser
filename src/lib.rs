@@ -187,50 +187,67 @@ fn parse_attrs(attr_str: String) -> HashMap<String, String> {
 }
 
 fn html_to_stack(html: &str) -> Vec<Token> {
-    let mut tag_chars_stack = Vec::<char>::new();
-    let mut txt_chars_stack = Vec::<char>::new();
+    let mut chars_stack = Vec::<char>::new();
     let mut token_stack = Vec::<Token>::new();
-    let mut in_tag_brackets = false;
+    let mut in_quotes: Option<char> = None;
+    // More precisely: is in angle brackets
+    let mut in_brackets = false;
     for ch in html.chars() {
-        match ch {
-            '<' => {
-                in_tag_brackets = true;
-                tag_chars_stack.push(ch);
-                // In case of pushing empty text tokens to the stack
-                if txt_chars_stack.len() == 0 {
-                    continue;
+        if let Some(quote) = in_quotes {
+            if ch == quote {
+                let last_char = chars_stack
+                    .last()
+                    .expect("cannot get the last char in chars stack")
+                    .clone();
+                if last_char != '\\' {
+                    in_quotes = None;
                 }
-                // Turn the chars in `txt_chars_stack` in to `String`
-                // and clean the chars stack.
-                let txt_text = String::from_iter(txt_chars_stack);
-                txt_chars_stack = Vec::new();
-                // Push the text we just got to the token stack.
-                token_stack.push(Token::Text(txt_text));
             }
-            '>' => {
-                in_tag_brackets = false;
-                tag_chars_stack.push(ch);
-                // Turn the chars in `tag_chars_stack` in to `String`
-                // and clean the chars stack.
-                let tag_text = String::from_iter(tag_chars_stack);
-                tag_chars_stack = Vec::new();
-                // Push the tag with the text we just got to the token stack.
-                let tag = Tag::from(tag_text.clone())
-                    .expect(format!("Invalid tag: {}", tag_text).as_str());
-                token_stack.push(Token::Tag(tag));
+            chars_stack.push(ch);
+        } else {
+            match ch {
+                '<' => {
+                    in_brackets = true;
+                    // In case of pushing empty text tokens to the stack
+                    if chars_stack.len() != 0 {
+                        // Turn the chars in `chars_stack` in to `String`
+                        // and clean the chars stack.
+                        let txt_text = String::from_iter(chars_stack);
+                        chars_stack = Vec::new();
+                        // Push the text we just got to the token stack.
+                        token_stack.push(Token::Text(txt_text));
+                    }
+                    chars_stack.push(ch);
+                }
+                '>' => {
+                    in_brackets = false;
+                    chars_stack.push(ch);
+                    // Turn the chars in `chars_stack` in to `String`
+                    // and clean the chars stack.
+                    let tag_text = String::from_iter(chars_stack);
+                    chars_stack = Vec::new();
+                    // Push the tag with the text we just got to the token stack.
+                    let tag = Tag::from(tag_text.clone())
+                        .expect(format!("Invalid tag: {}", tag_text).as_str());
+                    token_stack.push(Token::Tag(tag));
+                }
+                _ => {
+                    if in_brackets {
+                        match ch {
+                            '\'' => in_quotes = Some('\''),
+                            '\"' => in_quotes = Some('\"'),
+                            _ => {}
+                        }
+                    }
+                    chars_stack.push(ch)
+                }
             }
-            _ => match in_tag_brackets {
-                true => tag_chars_stack.push(ch),
-                false => txt_chars_stack.push(ch),
-            },
         }
     }
     token_stack
 }
 
-fn stack_to_dom(_: Vec<Token>) {
-    
-}
+fn stack_to_dom(_: Vec<Token>) {}
 
 pub fn parse(html: &str) {
     let stack = html_to_stack(html);
