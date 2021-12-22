@@ -123,6 +123,10 @@ fn parse_attrs(attr_str: String) -> HashMap<String, String> {
                 }
                 Some(quote) => {
                     if ch == quote {
+                        if chars_stack.len() == 0 {
+                            value_stack.push(String::new());
+                            continue;
+                        }
                         let last_char = chars_stack
                             .last()
                             .expect("cannot accesss the last char in `chars_stack`");
@@ -230,6 +234,7 @@ fn stack_to_dom(_: Vec<Token>) {
 
 pub fn parse(html: &str) {
     let stack = html_to_stack(html);
+    println!("{:#?}", stack);
     let dom = stack_to_dom(stack);
     dom
 }
