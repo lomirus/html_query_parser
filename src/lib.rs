@@ -9,7 +9,7 @@ enum Tag {
     /// Like `<div />`
     Closing(String, HashMap<String, String>),
     /// Like `<!doctype html>`
-    Document,
+    Doctype,
     /// Like `<!-- comment -->`
     Comment(String),
 }
@@ -37,7 +37,7 @@ impl Tag {
         } else if tag.starts_with("<!--") {
             Some(Self::from_comment(tag))
         } else if tag.starts_with("<!") {
-            Some(Self::Document)
+            Some(Self::Doctype)
         } else if tag.starts_with("<") {
             let tag_name_start = tag[1..tag.len()]
                 .chars()
