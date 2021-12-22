@@ -1,11 +1,13 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 enum Tag {
     /// Like `<div>`, including `<img>`, `<input>`, etc.
-    Start(String),
+    Start(String, HashMap<String, String>),
     /// Like `</div>`
     End(String),
     /// Like `<div />`
-    Closing(String),
+    Closing(String, HashMap<String, String>),
     /// Like `<!doctype html>`
     Document,
     /// Like `<!-- comment -->`
@@ -13,9 +15,23 @@ enum Tag {
 }
 
 impl Tag {
-    pub fn from(tag: String) -> Option<Self> {
-        if tag.ends_with(" />") {
-            Some(Self::Closing(tag[1..tag.len() - 3].to_string()))
+    fn from(tag: String) -> Option<Self> {
+        if tag.ends_with("/>") {
+            let tag_name_start = tag[1..tag.len()]
+                .chars()
+                .position(|x| x != ' ')
+                .expect("tag name cannot be all spaces after \"<\"")
+                + 1;
+            let tag_name_end_option = tag[tag_name_start..tag.len()]
+                .chars()
+                .position(|x| x == ' ');
+            let tag_name_end = match tag_name_end_option {
+                Some(end) => end + tag_name_start,
+                None => tag.len() - 2,
+            };
+            let tag_name = tag[tag_name_start..tag_name_end].to_string();
+            let attr_str = tag[tag_name_end..tag.len() - 2].trim().to_string();
+            Some(Self::Closing(tag_name, parse_attrs(attr_str)))
         } else if tag.starts_with("</") {
             Some(Self::End(tag[2..tag.len() - 1].to_string()))
         } else if tag.starts_with("<!--") {
@@ -23,7 +39,21 @@ impl Tag {
         } else if tag.starts_with("<!") {
             Some(Self::Document)
         } else if tag.starts_with("<") {
-            Some(Self::Start(tag[1..tag.len() - 1].to_string()))
+            let tag_name_start = tag[1..tag.len()]
+                .chars()
+                .position(|x| x != ' ')
+                .expect("tag name cannot be all spaces after \"<\"")
+                + 1;
+            let tag_name_end_option = tag[tag_name_start..tag.len()]
+                .chars()
+                .position(|x| x == ' ');
+            let tag_name_end = match tag_name_end_option {
+                Some(end) => end + tag_name_start,
+                None => tag.len() - 1,
+            };
+            let tag_name = tag[tag_name_start..tag_name_end].to_string();
+            let attr_str = tag[tag_name_end..tag.len() - 1].trim().to_string();
+            Some(Self::Start(tag_name, parse_attrs(attr_str)))
         } else {
             None
         }
@@ -50,8 +80,8 @@ pub fn parse(html: &str) {
                 if txt_char_stack.len() == 0 {
                     continue;
                 }
-                // Turn the chars in `txt_char_stack` in to `String` 
-                // and clean the char stack. 
+                // Turn the chars in `txt_char_stack` in to `String`
+                // and clean the char stack.
                 let txt_text = String::from_iter(txt_char_stack);
                 txt_char_stack = Vec::new();
                 // Push the text we just got to token stack.
@@ -60,8 +90,8 @@ pub fn parse(html: &str) {
             '>' => {
                 in_tag_brackets = false;
                 tag_char_stack.push(ch);
-                // Turn the chars in `tag_char_stack` in to `String` 
-                // and clean the char stack. 
+                // Turn the chars in `tag_char_stack` in to `String`
+                // and clean the char stack.
                 let tag_text = String::from_iter(tag_char_stack);
                 tag_char_stack = Vec::new();
                 // Push the tag with the text we just got to token stack.
@@ -75,7 +105,13 @@ pub fn parse(html: &str) {
             },
         }
     }
-    println!("{:?}", token_stack);
+    println!("{:#?}", token_stack);
+}
+
+fn parse_attrs(attr_str: String) -> HashMap<String, String> {
+    let mut hashmap = HashMap::new();
+    hashmap.insert("attr".to_string(), attr_str);
+    hashmap
 }
 
 #[cfg(test)]
@@ -92,6 +128,7 @@ mod tests {
     #[test]
     fn void() {
         crate::parse("<div />");
+        crate::parse("<div/>");
     }
     #[test]
     fn self_closing() {
@@ -112,5 +149,9 @@ mod tests {
     fn comment() {
         crate::parse("<!-- comment -->");
         crate::parse("<!--comment-->");
+    }
+    #[test]
+    fn attributes() {
+        crate::parse("<img src=\"example.png\" alt=example>");
     }
 }
