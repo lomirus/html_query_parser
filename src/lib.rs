@@ -11,7 +11,7 @@ enum Tag {
     /// Like `<!doctype html>`
     Document,
     /// Like `<!-- comment -->`
-    Comment,
+    Comment(String),
 }
 
 impl Tag {
@@ -35,7 +35,7 @@ impl Tag {
         } else if tag.starts_with("</") {
             Some(Self::End(tag[2..tag.len() - 1].to_string()))
         } else if tag.starts_with("<!--") {
-            Some(Self::Comment)
+            Some(Self::from_comment(tag))
         } else if tag.starts_with("<!") {
             Some(Self::Document)
         } else if tag.starts_with("<") {
@@ -57,6 +57,11 @@ impl Tag {
         } else {
             None
         }
+    }
+
+    #[inline]
+    fn from_comment(comment: String) -> Self {
+        Self::Comment(comment[4..comment.len() - 3].to_string())
     }
 }
 
@@ -192,6 +197,7 @@ fn html_to_stack(html: &str) -> Vec<Token> {
     let mut in_quotes: Option<char> = None;
     // More precisely: is in angle brackets
     let mut in_brackets = false;
+    let mut in_comment = false;
     for ch in html.chars() {
         if let Some(quote) = in_quotes {
             if ch == quote {
@@ -204,6 +210,17 @@ fn html_to_stack(html: &str) -> Vec<Token> {
                 }
             }
             chars_stack.push(ch);
+        } else if in_comment {
+            chars_stack.push(ch);
+            let len = chars_stack.len();
+            if chars_stack[len - 3..len] == ['-', '-', '>'] {
+                let comment = String::from_iter(chars_stack);
+                chars_stack = Vec::new();
+                let tag = Tag::from_comment(comment);
+                token_stack.push(Token::Tag(tag));
+                in_comment = false;
+                in_brackets = false;
+            }
         } else {
             match ch {
                 '<' => {
@@ -230,6 +247,12 @@ fn html_to_stack(html: &str) -> Vec<Token> {
                     let tag = Tag::from(tag_text.clone())
                         .expect(format!("Invalid tag: {}", tag_text).as_str());
                     token_stack.push(Token::Tag(tag));
+                }
+                '-' => {
+                    chars_stack.push(ch);
+                    if chars_stack.len() == 4 && chars_stack == ['<', '!', '-', '-'] {
+                        in_comment = true;
+                    }
                 }
                 _ => {
                     if in_brackets {

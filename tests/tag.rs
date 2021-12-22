@@ -44,6 +44,10 @@ fn complex() {
             <div>
                 <input value="<p value='haha'></p>" disable placeholder=input>
                 <input value="\"\"''/>">
+                <!-- Nothing is true -->
+                <!-- Everything is permitted -->
+                <!-- <p></p> -->
+                <!------------->
             </div>
             <footer></footer>
         </body>
