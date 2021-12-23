@@ -161,6 +161,7 @@ fn parse_attrs(attr_str: String) -> HashMap<String, String> {
                     if ch == quote {
                         if chars_stack.len() == 0 {
                             value_stack.push(String::new());
+                            attr_pos = AttrPos::Space;
                             continue;
                         }
                         let last_char = chars_stack
@@ -208,7 +209,10 @@ fn parse_attrs(attr_str: String) -> HashMap<String, String> {
     }
 
     if key_stack.len() != value_stack.len() {
-        panic!("{}", err_info)
+        panic!(
+            "{}\nkey:\t{:?}\nvalue:\t{:?}",
+            err_info, key_stack, value_stack
+        )
     }
 
     let mut hashmap = HashMap::new();
@@ -308,15 +312,17 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
     while i < token_stack.len() {
         match &token_stack[i] {
             Token::Start(start_name, attrs) => {
-                let end_pos = token_stack.iter().position(|x| {
+                // Find the matched closing tag from end to start.
+                let end_pos = token_stack.iter().rev().position(|x| {
                     if let Token::End(end_name) = x {
                         start_name == end_name
                     } else {
                         false
                     }
                 });
-                if let Some(j) = end_pos {
-                    // Paired tags like `<p></p>`
+                if let Some(j_rev) = end_pos {
+                    // You found a paired tags like `<p></p>`
+                    let j = token_stack.len() - 1 - j_rev;
                     let children = stack_to_dom(token_stack[i + 1..j].to_vec());
                     nodes.push(Node::Element {
                         name: start_name.clone(),
@@ -325,11 +331,11 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
                     });
                     i = j;
                 } else {
-                    // Unpaired tags like `<img>`
+                    // Else you found an unpaired tags like `<img>`
                     nodes.push(token_stack[i].to_node());
                 }
             }
-            Token::End(_) => panic!("unexpected end tag"),
+            Token::End(name) => panic!("unexpected end tag: {}", name),
             _ => nodes.push(token_stack[i].to_node()),
         }
         i += 1;

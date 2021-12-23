@@ -48,6 +48,13 @@ fn complex() {
                 <!-- Everything is permitted -->
                 <!-- <p></p> -->
                 <!------------->
+                <a b="" c="d"></a>
+                <span>
+                <span>
+                <span>
+                </span>
+                </span>
+                </span>
             </div>
             <footer></footer>
         </body>
