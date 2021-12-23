@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 pub use parse::parse;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Node {
     Element {
         name: String,
@@ -41,6 +41,7 @@ impl Node {
     }
 }
 
+#[derive(Debug)]
 pub struct Element {
     pub name: String,
     pub attrs: HashMap<String, String>,
