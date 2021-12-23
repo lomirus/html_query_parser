@@ -16,6 +16,59 @@ pub enum Node {
     Doctype,
 }
 
+pub struct Selector;
+
+impl Selector {
+    pub fn from(selector: &str) -> Self {
+        Selector
+    }
+}
+
+pub trait Queryable<T> {
+    /// Query the element for the given selector.
+    fn query(&self, selector: T) -> Option<Node>;
+    /// Query all the elements for the given selector. 
+    fn query_all(&self, selector: T) -> Vec<Node>;
+}
+
+impl Queryable<&str> for Vec<Node> {
+    fn query(&self, selector: &str) -> Option<Node> {
+        let selector = Selector::from(selector);
+        self.query(selector)
+    }
+    fn query_all(&self, selector: &str) -> Vec<Node> {
+        let selector = Selector::from(selector);
+        self.query_all(selector)
+    }
+}
+
+impl Queryable<Selector> for Vec<Node> {
+    fn query(&self, selector: Selector) -> Option<Node> {
+        todo!()
+    }
+    fn query_all(&self, selector: Selector) -> Vec<Node> {
+        todo!()
+    }
+}
+
+impl Queryable<&str> for Node {
+    fn query(&self, selector: &str) -> Option<Node> {
+        todo!()
+    }
+    fn query_all(&self, selector: &str) -> Vec<Node> {
+        todo!()
+    }
+}
+
+impl Queryable<Selector> for Node {
+    fn query(&self, selector: Selector) -> Option<Node> {
+        todo!()
+    }
+    fn query_all(&self, selector: Selector) -> Vec<Node> {
+        todo!()
+    }
+}
+
 fn html_to_stack(html: &str) -> Vec<Token> {
     let mut chars_stack = Vec::<char>::new();
     let mut token_stack = Vec::<Token>::new();
