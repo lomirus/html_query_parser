@@ -4,17 +4,17 @@ use crate::attrs;
 
 #[derive(Debug, Clone)]
 pub enum Token {
-    /// Like `<div>`, including `<img>`, `<input>`, etc.
+    // Like `<div>`, including `<img>`, `<input>`, etc.
     Start(String, HashMap<String, String>),
-    /// Like `</div>`
+    // Like `</div>`
     End(String),
-    /// Like `<div />`
+    // Like `<div />`
     Closing(String, HashMap<String, String>),
-    /// Like `<!doctype html>`
+    // Like `<!doctype html>`
     Doctype,
-    /// Like `<!-- comment -->`
+    // Like `<!-- comment -->`
     Comment(String),
-    /// Any text
+    // Any text
     Text(String),
 }
 

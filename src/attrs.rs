@@ -12,6 +12,7 @@ enum AttrPos {
     Space,
 }
 
+// Valid `attr_str` like: `src="example.png" alt=example disabled`
 pub fn parse(attr_str: String) -> HashMap<String, String> {
     let mut chars_stack: Vec<char> = Vec::new();
     let mut key_stack: Vec<String> = Vec::new();

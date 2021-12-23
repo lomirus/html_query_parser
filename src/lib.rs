@@ -16,8 +16,6 @@ pub enum Node {
     Doctype,
 }
 
-// Valid `attr_str` like: `src="example.png" alt=example disabled`
-
 fn html_to_stack(html: &str) -> Vec<Token> {
     let mut chars_stack = Vec::<char>::new();
     let mut token_stack = Vec::<Token>::new();
