@@ -11,3 +11,4 @@ Pure, simple and elegant HTML parser and query selector.
 - [ ] Query a particular node like `document.querySelector()`
 - [ ] Edit the dom tree like inserting or deleting a node.
 - [ ] Turn the dom tree into html code.
+- [ ] Simple and clear examples and documentation.
