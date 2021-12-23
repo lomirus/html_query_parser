@@ -352,7 +352,7 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
 /// use html_query_parser::parse;
 /// 
 /// // Parse a segment.
-/// let segment = parse("<p>Hello, world!</p>");
+/// let segment = parse(r#"<p class="content">Hello, world!</p>"#);
 /// println!("{:#?}", segment);
 /// 
 /// // Or you can parse a whole html file.
@@ -364,7 +364,9 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
 /// [
 ///     Element {
 ///         name: "p",
-///         attrs: {},
+///         attrs: {
+///             "class": "content",
+///         },
 ///         children: [
 ///             Text(
 ///                 "Hello, world!",
