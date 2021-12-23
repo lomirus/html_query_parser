@@ -2,5 +2,12 @@
 name = "html_query_parser"
 version = "0.1.0"
 edition = "2021"
+authors = ["Lomirus"]
+description = "Pure, simple and elegant HTML parser and query selector."
+homepage = "https://github.com/lomirus/html_query_parser"
+repository = "https://github.com/lomirus/html_query_parser"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["html", "query", "parser", "dom"]
 
 [dependencies]
