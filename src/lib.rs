@@ -1,106 +1,8 @@
+mod attrs;
+mod token;
+
 use std::collections::HashMap;
-
-#[derive(Debug, Clone)]
-enum Token {
-    /// Like `<div>`, including `<img>`, `<input>`, etc.
-    Start(String, HashMap<String, String>),
-    /// Like `</div>`
-    End(String),
-    /// Like `<div />`
-    Closing(String, HashMap<String, String>),
-    /// Like `<!doctype html>`
-    Doctype,
-    /// Like `<!-- comment -->`
-    Comment(String),
-    /// Any text
-    Text(String),
-}
-
-impl Token {
-    fn from(tag: String) -> Option<Self> {
-        if tag.ends_with("/>") {
-            let tag_name_start = tag[1..tag.len()]
-                .chars()
-                .position(|x| x != ' ')
-                .expect("tag name cannot be all spaces after \"<\"")
-                + 1;
-            let tag_name_end_option = tag[tag_name_start..tag.len()]
-                .chars()
-                .position(|x| x == ' ');
-            let tag_name_end = match tag_name_end_option {
-                Some(end) => end + tag_name_start,
-                None => tag.len() - 2,
-            };
-            let tag_name = tag[tag_name_start..tag_name_end].to_string();
-            let attr_str = tag[tag_name_end..tag.len() - 2].trim().to_string();
-            Some(Self::Closing(tag_name, parse_attrs(attr_str)))
-        } else if tag.starts_with("</") {
-            Some(Self::End(tag[2..tag.len() - 1].to_string()))
-        } else if tag.starts_with("<!--") {
-            Some(Self::from_comment(tag))
-        } else if tag.starts_with("<!") {
-            Some(Self::Doctype)
-        } else if tag.starts_with("<") {
-            let tag_name_start = tag[1..tag.len()]
-                .chars()
-                .position(|x| x != ' ')
-                .expect("tag name cannot be all spaces after \"<\"")
-                + 1;
-            let tag_name_end_option = tag[tag_name_start..tag.len()]
-                .chars()
-                .position(|x| x == ' ');
-            let tag_name_end = match tag_name_end_option {
-                Some(end) => end + tag_name_start,
-                None => tag.len() - 1,
-            };
-            let tag_name = tag[tag_name_start..tag_name_end].to_string();
-            let attr_str = tag[tag_name_end..tag.len() - 1].trim().to_string();
-            Some(Self::Start(tag_name, parse_attrs(attr_str)))
-        } else {
-            None
-        }
-    }
-
-    #[inline]
-    fn from_comment(comment: String) -> Self {
-        Self::Comment(comment[4..comment.len() - 3].to_string())
-    }
-
-    fn to_node(&self) -> Node {
-        match &self {
-            Self::Start(tag_name, attrs) => Node::Element {
-                name: tag_name.clone(),
-                attrs: attrs.clone(),
-                children: Vec::new(),
-            },
-            Self::End(tag_name) => Node::Element {
-                name: tag_name.clone(),
-                attrs: HashMap::new(),
-                children: Vec::new(),
-            },
-            Self::Closing(tag_name, attrs) => Node::Element {
-                name: tag_name.clone(),
-                attrs: attrs.clone(),
-                children: Vec::new(),
-            },
-            Self::Doctype => Node::Doctype,
-            Self::Comment(comment) => Node::Comment(comment.clone()),
-            Self::Text(text) => Node::Text(text.clone()),
-        }
-    }
-}
-
-/// Let's take `<img src="example.png" alt=image>` for example.
-enum AttrPos {
-    /// This including `src`, `alt`
-    Key,
-    /// This including `=`
-    Equal,
-    /// This including `example.png`, `image`
-    Value(Option<char>),
-    /// This including ` `
-    Space,
-}
+use token::Token;
 
 #[derive(Debug)]
 pub enum Node {
@@ -114,117 +16,7 @@ pub enum Node {
     Doctype,
 }
 
-/// Valid `attr_str` like: `src="example.png" alt=example disabled`
-fn parse_attrs(attr_str: String) -> HashMap<String, String> {
-    let mut chars_stack: Vec<char> = Vec::new();
-    let mut key_stack: Vec<String> = Vec::new();
-    let mut value_stack: Vec<String> = Vec::new();
-    let mut attr_pos = AttrPos::Key;
-    for ch in attr_str.chars() {
-        match attr_pos {
-            AttrPos::Key => match ch {
-                '=' => {
-                    attr_pos = AttrPos::Equal;
-                    let key = String::from_iter(chars_stack);
-                    chars_stack = Vec::new();
-                    key_stack.push(key)
-                }
-                ' ' => {
-                    attr_pos = AttrPos::Space;
-                    let key = String::from_iter(chars_stack);
-                    chars_stack = Vec::new();
-                    key_stack.push(key);
-                    value_stack.push(String::new())
-                }
-                _ => chars_stack.push(ch),
-            },
-            AttrPos::Equal => match ch {
-                '\'' => attr_pos = AttrPos::Value(Some('\'')),
-                '\"' => attr_pos = AttrPos::Value(Some('\"')),
-                _ => {
-                    attr_pos = AttrPos::Value(None);
-                    chars_stack.push(ch)
-                }
-            },
-            AttrPos::Value(delimiter) => match delimiter {
-                None => {
-                    if ch == ' ' {
-                        attr_pos = AttrPos::Space;
-                        let value = String::from_iter(chars_stack);
-                        chars_stack = Vec::new();
-                        value_stack.push(value)
-                    } else {
-                        chars_stack.push(ch);
-                    }
-                }
-                Some(quote) => {
-                    if ch == quote {
-                        if chars_stack.len() == 0 {
-                            value_stack.push(String::new());
-                            attr_pos = AttrPos::Space;
-                            continue;
-                        }
-                        let last_char = chars_stack
-                            .last()
-                            .expect("cannot accesss the last char in `chars_stack`");
-                        if last_char == &'\\' {
-                            chars_stack.push(ch);
-                            continue;
-                        } else {
-                            attr_pos = AttrPos::Space;
-                            let value = String::from_iter(chars_stack);
-                            chars_stack = Vec::new();
-                            value_stack.push(value)
-                        }
-                    } else {
-                        chars_stack.push(ch)
-                    }
-                }
-            },
-            AttrPos::Space => {
-                if ch != ' ' {
-                    attr_pos = AttrPos::Key;
-                    chars_stack.push(ch);
-                }
-            }
-        }
-    }
-
-    let err_info = format!("cannot parse the attributes: {}", attr_str);
-    let err_info = err_info.as_str();
-
-    if !chars_stack.is_empty() {
-        let str = String::from_iter(chars_stack);
-        match attr_pos {
-            AttrPos::Key => key_stack.push(str),
-            AttrPos::Value(delimiter) => {
-                if let None = delimiter {
-                    value_stack.push(str);
-                } else {
-                    panic!("{}", err_info)
-                }
-            }
-            _ => {}
-        }
-    }
-
-    if key_stack.len() != value_stack.len() {
-        panic!(
-            "{}\nkey:\t{:?}\nvalue:\t{:?}",
-            err_info, key_stack, value_stack
-        )
-    }
-
-    let mut hashmap = HashMap::new();
-    let len = key_stack.len();
-    for _ in 0..len {
-        hashmap.insert(
-            key_stack.pop().expect(err_info),
-            value_stack.pop().expect(err_info),
-        );
-    }
-    hashmap
-}
+// Valid `attr_str` like: `src="example.png" alt=example disabled`
 
 fn html_to_stack(html: &str) -> Vec<Token> {
     let mut chars_stack = Vec::<char>::new();
@@ -350,11 +142,11 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
 ///
 /// ```
 /// use html_query_parser::parse;
-/// 
+///
 /// // Parse a segment.
 /// let segment = parse(r#"<p class="content">Hello, world!</p>"#);
 /// println!("{:#?}", segment);
-/// 
+///
 /// // Or you can parse a whole html file.
 /// let document = parse("<!doctype html><html><head></head><body></body></html>");
 /// println!("{:#?}", document);
