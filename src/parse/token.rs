@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use crate::Node;
-use crate::attrs;
+use crate::parse::attrs;
 
 #[derive(Debug, Clone)]
 pub enum Token {
