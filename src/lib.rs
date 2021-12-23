@@ -344,6 +344,54 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
     nodes
 }
 
+/// Parse the html string and return a `Vec` of `Node`.
+///
+/// Example:
+///
+/// ```
+/// use html_query_parser::parse;
+/// 
+/// // Parse a segment.
+/// let segment = parse("<p>Hello, world!</p>");
+/// println!("{:#?}", segment);
+/// 
+/// // Or you can parse a whole html file.
+/// let document = parse("<!doctype html><html><head></head><body></body></html>");
+/// println!("{:#?}", document);
+/// ```
+/// Output:
+/// ```log
+/// [
+///     Element {
+///         name: "p",
+///         attrs: {},
+///         children: [
+///             Text(
+///                 "Hello, world!",
+///             ),
+///         ],
+///     },
+/// ]
+/// [
+///     Doctype,
+///     Element {
+///         name: "html",
+///         attrs: {},
+///         children: [
+///             Element {
+///                 name: "head",
+///                 attrs: {},
+///                 children: [],
+///             },
+///             Element {
+///                 name: "body",
+///                 attrs: {},
+///                 children: [],
+///             },
+///         ],
+///     },
+/// ]
+/// ```
 pub fn parse(html: &str) -> Vec<Node> {
     let stack = html_to_stack(html);
     let dom = stack_to_dom(stack);
