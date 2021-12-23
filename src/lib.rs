@@ -16,6 +16,30 @@ pub enum Node {
     Doctype,
 }
 
+impl Node {
+    pub fn is_element(&self) -> bool {
+        match self {
+            Node::Element { .. } => true,
+            _ => false,
+        }
+    }
+
+    pub fn to_element(self) -> Result<Element, &'static str>  {
+        match self {
+            Node::Element {
+                name,
+                attrs,
+                children,
+            } => Ok(Element {
+                name,
+                attrs,
+                children,
+            }),
+            _ => Err("not an element"),
+        }
+    }
+}
+
 pub struct Selector;
 
 impl Selector {
@@ -24,47 +48,59 @@ impl Selector {
     }
 }
 
+pub struct Element {
+    pub name: String,
+    pub attrs: HashMap<String, String>,
+    pub children: Vec<Node>,
+}
+
 pub trait Queryable<T> {
-    /// Query the element for the given selector.
-    fn query(&self, selector: T) -> Option<Node>;
-    /// Query all the elements for the given selector. 
-    fn query_all(&self, selector: T) -> Vec<Node>;
+    fn query(&self, selector: T) -> Option<Element>;
+    fn query_all(&self, selector: T) -> Vec<Element>;
 }
 
 impl Queryable<&str> for Vec<Node> {
-    fn query(&self, selector: &str) -> Option<Node> {
+    /// Query the node for the given string selector.
+    fn query(&self, selector: &str) -> Option<Element> {
         let selector = Selector::from(selector);
         self.query(selector)
     }
-    fn query_all(&self, selector: &str) -> Vec<Node> {
+    /// Query all the nodes for the given string selector.
+    fn query_all(&self, selector: &str) -> Vec<Element> {
         let selector = Selector::from(selector);
         self.query_all(selector)
     }
 }
 
 impl Queryable<Selector> for Vec<Node> {
-    fn query(&self, selector: Selector) -> Option<Node> {
+    /// Query the node for the given selector.
+    fn query(&self, selector: Selector) -> Option<Element> {
         todo!()
     }
-    fn query_all(&self, selector: Selector) -> Vec<Node> {
-        todo!()
-    }
-}
-
-impl Queryable<&str> for Node {
-    fn query(&self, selector: &str) -> Option<Node> {
-        todo!()
-    }
-    fn query_all(&self, selector: &str) -> Vec<Node> {
+    /// Query all the nodes for the given selector.
+    fn query_all(&self, selector: Selector) -> Vec<Element> {
         todo!()
     }
 }
 
-impl Queryable<Selector> for Node {
-    fn query(&self, selector: Selector) -> Option<Node> {
+impl Queryable<&str> for Element {
+    /// Query the node for the given string selector.
+    fn query(&self, selector: &str) -> Option<Element> {
         todo!()
     }
-    fn query_all(&self, selector: Selector) -> Vec<Node> {
+    /// Query all the nodes for the given string selector.
+    fn query_all(&self, selector: &str) -> Vec<Element> {
+        todo!()
+    }
+}
+
+impl Queryable<Selector> for Element {
+    /// Query the node for the given selector.
+    fn query(&self, selector: Selector) -> Option<Element> {
+        todo!()
+    }
+    /// Query all the nodes for the given selector.
+    fn query_all(&self, selector: Selector) -> Vec<Element> {
         todo!()
     }
 }
