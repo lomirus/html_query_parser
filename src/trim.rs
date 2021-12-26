@@ -1,15 +1,30 @@
-use crate::{Node, Element};
+use crate::{Element, Node};
 
-trait Trimable {
+pub trait Trimable {
     fn trim(self) -> Self;
 }
 
 impl Trimable for Vec<Node> {
     fn trim(self) -> Self {
-        let mut nodes = Vec::new();
+        let mut nodes: Vec<Node> = Vec::new();
         for node in self {
-            if node.is_element() {
-                nodes.push(node);
+            match node {
+                Node::Element {
+                    name,
+                    attrs,
+                    children,
+                } => nodes.push(Node::Element {
+                    name,
+                    attrs,
+                    children: children.trim(),
+                }),
+                Node::Text(text) => {
+                    if text.trim() != "" {
+                        nodes.push(Node::Text(text));
+                    }
+                }
+                Node::Comment(_) => {}
+                Node::Doctype => nodes.push(node),
             }
         }
         nodes
