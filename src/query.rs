@@ -14,6 +14,10 @@ enum SelectorPos {
 }
 
 impl Selector {
+    /// The `selector` only supports type selector, ID selector and class selector.
+    /// 
+    /// For example, `div#app`, `span` would be ok, but `.container > div`, 
+    /// `#app *` would get unexpected results.
     pub fn from(selector: &str) -> Self {
         let selector_chars = selector.trim().chars();
         let mut chars_stack = Vec::<char>::new();
@@ -59,25 +63,13 @@ impl Selector {
     }
 }
 
-pub trait Queryable<T> {
-    fn query(&self, selector: T) -> Option<Element>;
-    fn query_all(&self, selector: T) -> Vec<Element>;
+pub trait Queryable {
+    fn query(&self, selector: &Selector) -> Option<Element>;
+    fn query_all(&self, selector: &Selector) -> Vec<Element>;
 }
 
-impl Queryable<&str> for Vec<Node> {
-    /// Query the node for the given string selector.
-    fn query(&self, selector: &str) -> Option<Element> {
-        let selector = Selector::from(selector);
-        self.query(&selector)
-    }
-    /// Query all the nodes for the given string selector.
-    fn query_all(&self, selector: &str) -> Vec<Element> {
-        let selector = Selector::from(selector);
-        self.query_all(&selector)
-    }
-}
 
-impl Queryable<&Selector> for Vec<Node> {
+impl Queryable for Vec<Node> {
     /// Query the node for the given selector.
     fn query(&self, selector: &Selector) -> Option<Element> {
         for node in self {
@@ -169,20 +161,7 @@ impl Queryable<&Selector> for Vec<Node> {
     }
 }
 
-impl Queryable<&str> for Element {
-    /// Query the node for the given string selector.
-    fn query(&self, selector: &str) -> Option<Element> {
-        let selector = Selector::from(selector);
-        self.children.query(&selector)
-    }
-    /// Query all the nodes for the given string selector.
-    fn query_all(&self, selector: &str) -> Vec<Element> {
-        let selector = Selector::from(selector);
-        self.children.query_all(&selector)
-    }
-}
-
-impl Queryable<&Selector> for Element {
+impl Queryable for Element {
     /// Query the node for the given selector.
     fn query(&self, selector: &Selector) -> Option<Element> {
         self.children.query(selector)
