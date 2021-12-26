@@ -1,4 +1,5 @@
 mod parse;
+mod trim;
 pub mod query;
 
 use std::collections::HashMap;
