@@ -30,6 +30,31 @@ fn attributes() {
 }
 
 #[test]
+fn matched() {
+    parse(
+        r#"
+        <span>
+            <span>
+                <span></span>
+            </span>
+        </span>"#,
+    );
+    parse(
+        r#"
+        <span></span>
+        <span></span>
+        <span></span>"#,
+    );
+    parse(
+        r#"
+        <span>
+            <span></span>
+        </span>
+        <span></span>"#,
+    );
+}
+
+#[test]
 fn complex() {
     parse(
         r#"
@@ -51,12 +76,6 @@ fn complex() {
                 <!-- <p></p> -->
                 <!------------->
                 <a b="" c="d"></a>
-                <span>
-                <span>
-                <span>
-                </span>
-                </span>
-                </span>
             </div>
             <footer></footer>
         </body>
