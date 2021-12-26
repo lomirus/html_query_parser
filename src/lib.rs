@@ -1,6 +1,7 @@
-mod parse;
-pub mod trim;
+pub mod html;
+pub mod parse;
 pub mod query;
+pub mod trim;
 
 use std::collections::HashMap;
 
@@ -26,7 +27,7 @@ impl Node {
         }
     }
 
-    pub fn to_element(self) -> Result<Element, &'static str>  {
+    pub fn to_element(self) -> Result<Element, &'static str> {
         match self {
             Node::Element {
                 name,
