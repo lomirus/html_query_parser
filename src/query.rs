@@ -76,33 +76,41 @@ impl Queryable for Vec<Node> {
             if node.is_element() {
                 let element = node.clone().to_element().unwrap();
                 let mut matched = true;
-                if element.name != selector.tag {
+
+                if selector.tag != "" && element.name != selector.tag {
                     matched = false;
                 }
-                match element.attrs.get("class") {
-                    Some(class) => {
-                        if &selector.class != class {
-                            matched = false;
+
+                if selector.class != "" {
+                    match element.attrs.get("class") {
+                        Some(class) => {
+                            if &selector.class != class {
+                                matched = false;
+                            }
                         }
-                    }
-                    None => {
-                        if selector.class != "" {
-                            matched = false;
-                        }
-                    }
-                }
-                match element.attrs.get("id") {
-                    Some(id) => {
-                        if &selector.id != id {
-                            matched = false;
-                        }
-                    }
-                    None => {
-                        if selector.id != "" {
-                            matched = false;
+                        None => {
+                            if selector.class != "" {
+                                matched = false;
+                            }
                         }
                     }
                 }
+
+                if selector.id != "" {
+                    match element.attrs.get("id") {
+                        Some(id) => {
+                            if &selector.id != id {
+                                matched = false;
+                            }
+                        }
+                        None => {
+                            if selector.id != "" {
+                                matched = false;
+                            }
+                        }
+                    }
+                }
+                
                 if matched {
                     return Some(element);
                 } else {
