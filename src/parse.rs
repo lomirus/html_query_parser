@@ -1,8 +1,13 @@
 mod attrs;
 mod token;
 
-use token::Token;
 use crate::Node;
+use token::Token;
+
+const VOID_TAGS: [&str; 15] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
+    "source", "track", "wbr",
+];
 
 fn html_to_stack(html: &str) -> Vec<Token> {
     let mut chars_stack = Vec::<char>::new();
@@ -84,41 +89,52 @@ fn html_to_stack(html: &str) -> Vec<Token> {
 }
 
 fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
-    let mut nodes = Vec::new();
-
-    let mut i = 0;
-    while i < token_stack.len() {
-        match &token_stack[i] {
-            Token::Start(start_name, attrs) => {
-                // Find the matched closing tag from end to start.
-                let end_pos = token_stack.iter().rev().position(|x| {
-                    if let Token::End(end_name) = x {
-                        start_name == end_name
+    let mut nodes: Vec<Node> = Vec::new();
+    let mut start_tokens_stack: Vec<Token> = Vec::new();
+    let mut start_token_index = 0;
+    for (i, token) in token_stack.iter().enumerate() {
+        match token {
+            Token::Start(tag, attrs) => {
+                let is_void_tag = VOID_TAGS.contains(&tag.as_str());
+                if start_tokens_stack.is_empty() {
+                    if is_void_tag {
+                        nodes.push(Node::Element {
+                            name: tag.clone(),
+                            attrs: attrs.clone(),
+                            children: Vec::new(),
+                        });
                     } else {
-                        false
+                        start_token_index = i;
+                        start_tokens_stack.push(Token::Start(tag.clone(), attrs.clone()));
                     }
-                });
-                if let Some(j_rev) = end_pos {
-                    // You found a paired tags like `<p></p>`
-                    let j = token_stack.len() - 1 - j_rev;
-                    let children = stack_to_dom(token_stack[i + 1..j].to_vec());
-                    nodes.push(Node::Element {
-                        name: start_name.clone(),
-                        attrs: attrs.clone(),
-                        children,
-                    });
-                    i = j;
                 } else {
-                    // Else you found an unpaired tags like `<img>`
-                    nodes.push(token_stack[i].to_node());
+                    if !is_void_tag {
+                        start_tokens_stack.push(Token::Start(tag.clone(), attrs.clone()));
+                    }
                 }
             }
-            Token::End(name) => panic!("unexpected end tag: {}", name),
-            _ => nodes.push(token_stack[i].to_node()),
+            Token::End(tag) => {
+                let start_tag = start_tokens_stack
+                    .pop()
+                    .expect(format!("unexpected end tag: {}", tag).as_str())
+                    .into_node()
+                    .to_element()
+                    .unwrap();
+                if start_tokens_stack.is_empty() {
+                    nodes.push(Node::Element {
+                        name: start_tag.name,
+                        attrs: start_tag.attrs,
+                        children: stack_to_dom(token_stack[start_token_index + 1..i].to_vec()),
+                    })
+                }
+            }
+            _ => {
+                if start_tokens_stack.is_empty() {
+                    nodes.push(token.node());
+                }
+            }
         }
-        i += 1;
     }
-
     nodes
 }
 
