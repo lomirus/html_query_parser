@@ -1,4 +1,9 @@
-## v0.2.0
+## v0.2.1 (2021-12-27)
+
+- Fix some documentation problems
+- Simplify the `try_element()` method
+
+## v0.2.0 (2021-12-27)
 
 - Fix some fatal parse errors.
 - Add `trim()` method to remove all empty text nodes.
