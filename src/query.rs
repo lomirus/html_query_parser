@@ -74,7 +74,7 @@ impl Queryable for Vec<Node> {
     fn query(&self, selector: &Selector) -> Option<Element> {
         for node in self {
             if node.is_element() {
-                let element = node.clone().to_element().unwrap();
+                let element = node.clone().try_into_element().unwrap();
                 let mut matched = true;
 
                 if selector.tag != "" && element.name != selector.tag {
@@ -127,7 +127,7 @@ impl Queryable for Vec<Node> {
         let mut elements = Vec::new();
         for node in self {
             if node.is_element() {
-                let element = node.clone().to_element().unwrap();
+                let element = node.clone().try_into_element().unwrap();
                 // Recursively traverse the descendants nodes
                 let sub_elements = element.query_all(selector);
                 elements.extend(sub_elements);

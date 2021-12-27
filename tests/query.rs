@@ -29,7 +29,7 @@ fn element_query() {
     let nodes = parse(HTML);
     let node = nodes.into_iter().nth(1).unwrap();
     let element = node
-        .to_element()
+        .try_into_element()
         .unwrap()
         .query(&Selector::from("span"))
         .unwrap();
@@ -41,7 +41,7 @@ fn element_query_all() {
     let nodes = parse(HTML);
     let node = nodes.into_iter().nth(1).unwrap();
     let elements = node
-        .to_element()
+        .try_into_element()
         .unwrap()
         .query_all(&Selector::from("span"));
     println!("{:?}", elements);
@@ -50,6 +50,7 @@ fn element_query_all() {
 #[test]
 fn class_query() {
     let nodes = parse(HTML);
-    let element = nodes.query(&Selector::from(".last")).unwrap();
+    let selector = Selector::from(".last");
+    let element = nodes.query(&selector).unwrap();
     println!("{:?}", element);
 }

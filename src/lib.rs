@@ -27,7 +27,7 @@ impl Node {
         }
     }
 
-    pub fn to_element(self) -> Result<Element, &'static str> {
+    pub fn try_into_element(self) -> Result<Element, &'static str> {
         match self {
             Node::Element {
                 name,

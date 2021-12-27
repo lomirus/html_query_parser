@@ -12,6 +12,6 @@ const HTML: &str = r#"
 
 #[test]
 fn html() {
-    let html = parse(HTML).trim().to_html();
+    let html = parse(HTML).trim().into_html();
     println!("{}", html);
 }

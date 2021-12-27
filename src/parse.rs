@@ -118,7 +118,7 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
                     .pop()
                     .expect(format!("unexpected end tag: {}", tag).as_str())
                     .into_node()
-                    .to_element()
+                    .try_into_element()
                     .unwrap();
                 if start_tokens_stack.is_empty() {
                     nodes.push(Node::Element {
