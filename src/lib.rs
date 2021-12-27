@@ -30,11 +30,8 @@ impl Node {
         }
     }
 
-    pub fn try_element(&self) -> Result<Element, &'static str> {
-        match self {
-            Node::Element { .. } => Ok(self.clone().try_into_element().unwrap()),
-            _ => Err("not an element"),
-        }
+    fn try_element(&self) -> Result<Element, &'static str> {
+        self.clone().try_into_element()
     }
 
     pub fn try_into_element(self) -> Result<Element, &'static str> {
