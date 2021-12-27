@@ -19,15 +19,21 @@ Output:
 
 ```rust
 [
+    Doctype,
     Element {
-        name: "p",
-        attrs: {
-            "class": "content",
-        },
+        name: "html",
+        attrs: {},
         children: [
-            Text(
-                "Hello, world!",
-            ),
+            Element {
+                name: "head",
+                attrs: {},
+                children: [],
+            },
+            Element {
+                name: "body",
+                attrs: {},
+                children: [],
+            },
         ],
     },
 ]
