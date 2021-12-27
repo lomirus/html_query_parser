@@ -1,7 +1,4 @@
-use html_query_parser::{
-    parse,
-    query::{Queryable, Selector},
-};
+use html_query_parser::{parse, Queryable, Selector};
 
 const HTML: &str = r#"
     <div>

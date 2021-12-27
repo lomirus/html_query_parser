@@ -1,8 +1,4 @@
-use html_query_parser::{
-    parse,
-    trim::Trimable,
-    html::Htmlifiable,
-};
+use html_query_parser::{parse, Htmlifiable, Trimable};
 
 const HTML: &str = r#"
     <div>
@@ -19,5 +15,8 @@ fn original_html() {
 #[test]
 fn trimmed_html() {
     let html = parse(HTML).trim().html();
-    assert_eq!(html, r#"<div><span id="class">Hello</span><span class="id">World</span></div>"#);
+    assert_eq!(
+        html,
+        r#"<div><span id="class">Hello</span><span class="id">World</span></div>"#
+    );
 }

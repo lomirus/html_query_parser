@@ -1,11 +1,14 @@
-pub mod html;
-pub mod parse;
-pub mod query;
-pub mod trim;
+mod html;
+mod parse;
+mod query;
+mod trim;
 
 use std::collections::HashMap;
 
+pub use html::Htmlifiable;
 pub use parse::parse;
+pub use query::{Queryable, Selector};
+pub use trim::Trimable;
 
 #[derive(Debug, Clone)]
 pub enum Node {

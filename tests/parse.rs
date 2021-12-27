@@ -1,4 +1,4 @@
-use html_query_parser::{parse, trim::Trimable};
+use html_query_parser::{parse, Trimable};
 
 #[test]
 fn paired_tag() {
