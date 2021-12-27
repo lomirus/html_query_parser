@@ -6,12 +6,18 @@ use html_query_parser::{
 
 const HTML: &str = r#"
     <div>
-        <span>Hello</span>
-        <div class="last">Last Element</div>
+        <span id="class">Hello</span>
+        <span class="id">World</span>
     </div>"#;
 
 #[test]
-fn html() {
+fn original_html() {
+    let html = parse(HTML).into_html();
+    assert_eq!(html, HTML);
+}
+
+#[test]
+fn trimmed_html() {
     let html = parse(HTML).trim().into_html();
-    println!("{}", html);
+    assert_eq!(html, r#"<div><span id="class">Hello</span><span class="id">World</span></div>"#);
 }

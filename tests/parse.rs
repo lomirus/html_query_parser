@@ -1,62 +1,80 @@
-use html_query_parser::parse;
+use html_query_parser::{parse, trim::Trimable};
 
 #[test]
 fn paired_tag() {
-    parse("<p></p>");
-    parse("<div>Hello, world!</div>");
+    let a = parse("<p></p>");
+    let b = parse("<div>Hello, world!</div>");
+
+    println!("{:#?}", a);
+    println!("{:#?}", b);
 }
 
 #[test]
 fn void_tag() {
-    parse("<div />");
-    parse("<div/>");
+    let a = parse("<div />");
+    let b = parse("<div/>");
+
+    println!("{:#?}", a);
+    println!("{:#?}", b);
 }
 
 #[test]
 fn self_closing_tag() {
-    parse("<img>");
+    let a = parse("<img>");
+
+    println!("{:#?}", a);
 }
 
 #[test]
 fn comment_tag() {
-    parse("<!-- comment -->");
-    parse("<!--comment-->");
+    let a = parse("<!-- comment -->");
+    let b = parse("<!--comment-->");
+
+    println!("{:#?}", a);
+    println!("{:#?}", b);
 }
 
 #[test]
 fn attributes() {
-    parse("<img src=\"example.png\" alt=example>");
-    parse("<input disabled type=\"button\">");
+    let a = parse("<img src=\"example.png\" alt=example>");
+    let b = parse("<input disabled type=\"button\">");
+
+    println!("{:#?}", a);
+    println!("{:#?}", b);
 }
 
 #[test]
 fn matched() {
-    parse(
+    let a = parse(
         r#"
         <span>
             <span>
                 <span></span>
             </span>
         </span>"#,
-    );
-    parse(
+    ).trim();
+    let b = parse(
         r#"
         <span></span>
         <span></span>
         <span></span>"#,
-    );
-    parse(
+    ).trim();
+    let c = parse(
         r#"
         <span>
             <span></span>
         </span>
         <span></span>"#,
-    );
+    ).trim();
+
+    println!("{:#?}", a);
+    println!("{:#?}", b);
+    println!("{:#?}", c);
 }
 
 #[test]
 fn complex() {
-    parse(
+    let a = parse(
         r#"
         <!DOCTYPE html>
         <html lang="en">
@@ -80,5 +98,7 @@ fn complex() {
             <footer></footer>
         </body>
         </html>"#,
-    );
+    ).trim();
+
+    println!("{:#?}", a);
 }

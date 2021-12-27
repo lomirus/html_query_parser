@@ -50,7 +50,6 @@ fn element_query_all() {
 #[test]
 fn class_query() {
     let nodes = parse(HTML);
-    let selector = Selector::from(".last");
-    let element = nodes.query(&selector).unwrap();
+    let element = nodes.query(&Selector::from(".last")).unwrap();
     println!("{:?}", element);
 }
