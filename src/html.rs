@@ -1,6 +1,8 @@
 use crate::{Element, Node};
 
+/// Implement `html()` method to `Vec<Node>`, `Element` and `Node`.
 pub trait Htmlifiable {
+    /// Convert the object to html string.
     fn html(&self) -> String;
 }
 

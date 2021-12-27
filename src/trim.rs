@@ -1,6 +1,8 @@
 use crate::{Element, Node};
 
+/// Implement `trim()` method to `Vec<Node>` and `Element`.
 pub trait Trimable {
+    /// Remove all empty text nodes from `self`.
     fn trim(self) -> Self;
 }
 

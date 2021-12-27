@@ -1,5 +1,6 @@
 use crate::{Element, Node};
 
+/// Used in `query()` and `query_all()` methods.
 #[derive(Debug)]
 pub struct Selector {
     class: String,
@@ -63,14 +64,16 @@ impl Selector {
     }
 }
 
+/// Implement `query()`, `query_all()` methods to `Vec<Node>` and `Element`.
 pub trait Queryable {
+    /// Query the node in `self` for the given selector.
     fn query(&self, selector: &Selector) -> Option<Element>;
+    /// Query all the nodes in `self` for the given selector.
     fn query_all(&self, selector: &Selector) -> Vec<Element>;
 }
 
 
 impl Queryable for Vec<Node> {
-    /// Query the node for the given selector.
     fn query(&self, selector: &Selector) -> Option<Element> {
         for node in self {
             if node.is_element() {
@@ -122,7 +125,6 @@ impl Queryable for Vec<Node> {
         }
         None
     }
-    /// Query all the nodes for the given selector.
     fn query_all(&self, selector: &Selector) -> Vec<Element> {
         let mut elements = Vec::new();
         for node in self {
@@ -170,11 +172,9 @@ impl Queryable for Vec<Node> {
 }
 
 impl Queryable for Element {
-    /// Query the node for the given selector.
     fn query(&self, selector: &Selector) -> Option<Element> {
         self.children.query(selector)
     }
-    /// Query all the nodes for the given selector.
     fn query_all(&self, selector: &Selector) -> Vec<Element> {
         self.children.query_all(selector)
     }

@@ -138,7 +138,7 @@ fn stack_to_dom(token_stack: Vec<Token>) -> Vec<Node> {
     nodes
 }
 
-/// Parse the html string and return a `Vec` of `Node`.
+/// Parse the html string and return a `Vector` of `Node`.
 ///
 /// Example:
 ///
