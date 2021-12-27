@@ -1,20 +1,20 @@
 use crate::{Element, Node};
 
 pub trait Htmlifiable {
-    fn into_html(self) -> String;
+    fn html(&self) -> String;
 }
 
 impl Htmlifiable for Element {
-    fn into_html(self) -> String {
+    fn html(&self) -> String {
         if self.attrs.len() == 0 {
             return format!(
                 "<{}>{}</{}>",
                 self.name,
-                self.children.into_html(),
+                self.children.html(),
                 self.name
             );
         }
-        let attrs = &self
+        let attrs = self
             .attrs
             .iter()
             .map(|(k, v)| {
@@ -30,16 +30,16 @@ impl Htmlifiable for Element {
             "<{} {}>{}</{}>",
             self.name,
             attrs,
-            self.children.into_html(),
+            self.children.html(),
             self.name
         )
     }
 }
 
 impl Htmlifiable for Node {
-    fn into_html(self) -> String {
+    fn html(&self) -> String {
         match self {
-            Node::Element { .. } => self.try_into_element().unwrap().into_html(),
+            Node::Element { .. } => self.try_element().unwrap().html(),
             Node::Text(text) => text.to_string(),
             Node::Comment(comment) => format!("<!--{}-->", comment),
             Node::Doctype => "<!DOCTYPE html>".to_string(),
@@ -48,10 +48,10 @@ impl Htmlifiable for Node {
 }
 
 impl Htmlifiable for Vec<Node> {
-    fn into_html(self) -> String {
+    fn html(&self) -> String {
         let mut html = String::new();
         for node in self {
-            html.push_str(node.into_html().as_str());
+            html.push_str(node.html().as_str());
         }
         html
     }

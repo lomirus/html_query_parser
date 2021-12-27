@@ -12,12 +12,12 @@ const HTML: &str = r#"
 
 #[test]
 fn original_html() {
-    let html = parse(HTML).into_html();
+    let html = parse(HTML).html();
     assert_eq!(html, HTML);
 }
 
 #[test]
 fn trimmed_html() {
-    let html = parse(HTML).trim().into_html();
+    let html = parse(HTML).trim().html();
     assert_eq!(html, r#"<div><span id="class">Hello</span><span class="id">World</span></div>"#);
 }
