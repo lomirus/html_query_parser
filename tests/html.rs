@@ -1,4 +1,4 @@
-use html_query_parser::{parse, Htmlifiable, Trimable};
+use html_query_parser::{parse, Htmlifiable, Editable};
 
 const HTML: &str = r#"
     <div>
