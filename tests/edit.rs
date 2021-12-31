@@ -13,7 +13,7 @@ const HTML: &str = r#"
     </body>
     </html>"#;
 
-const TEST_HTML: &str = r#"
+const INSERTED_HTML: &str = r#"
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -24,8 +24,19 @@ const TEST_HTML: &str = r#"
     <script>console.log("Hello World")</script></body>
     </html>"#;
 
+const REMOVED_HTML: &str = r#"
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        
+        <title>Document</title>
+    </head>
+    <body>
+    </body>
+    </html>"#;
+
 #[test]
-fn trimmed_html() {
+fn insert() {
     let body_selector = Selector::from("body");
     let script = Node::Element {
         name: "script".to_string(),
@@ -33,5 +44,12 @@ fn trimmed_html() {
         children: vec![Node::Text(r#"console.log("Hello World")"#.to_string())],
     };
     let html = parse(HTML).insert_to(&body_selector, script).html();
-    assert_eq!(html, TEST_HTML);
+    assert_eq!(html, INSERTED_HTML);
+}
+
+#[test]
+fn remove() {
+    let meta_selector = Selector::from("meta");
+    let html = parse(HTML).remove_by(&meta_selector).html();
+    assert_eq!(html, REMOVED_HTML);
 }
