@@ -1,11 +1,13 @@
 use crate::{Element, Node, Selector};
 
-/// Trim or insert elements into the DOM.
+/// Insert or remove elements by `Selector`, and trim the dom.
 pub trait Editable {
     /// Remove all empty text nodes from `self`.
     fn trim(self) -> Self;
     /// Insert `node` as the last child to all elements that matches the `selector`.
     fn insert_to(&mut self, selector: &Selector, target: Node) -> &mut Self;
+    /// Remove all elements that matches the `selector`.
+    fn remove_by(&mut self, selector: &Selector) -> &mut Self;
 }
 
 impl Editable for Vec<Node> {
@@ -33,6 +35,7 @@ impl Editable for Vec<Node> {
         }
         nodes
     }
+    
     fn insert_to(&mut self, selector: &Selector, target: Node) -> &mut Self {
         for node in self.iter_mut() {
             if let Node::Element {
@@ -53,6 +56,26 @@ impl Editable for Vec<Node> {
         }
         self
     }
+
+    fn remove_by(&mut self, selector: &Selector) -> &mut Self {
+        self.retain(|node| {
+            if let Node::Element { name, attrs, .. } = node {
+                let element = Element {
+                    name: name.clone(),
+                    attrs: attrs.clone(),
+                    children: vec![],
+                };
+                return !selector.matches(&element);
+            }
+            true
+        });
+        for node in self.iter_mut() {
+            if let Node::Element { children, .. } = node {
+                children.remove_by(selector);
+            }
+        }
+        self
+    }
 }
 
 impl Editable for Element {
@@ -63,11 +86,17 @@ impl Editable for Element {
             children: self.children.trim(),
         }
     }
+
     fn insert_to(&mut self, selector: &Selector, target: Node) -> &mut Self {
         self.children.insert_to(selector, target.clone());
         if selector.matches(self) {
             self.children.push(target);
         }
+        self
+    }
+
+    fn remove_by(&mut self, selector: &Selector) -> &mut Self {
+        self.children.remove_by(selector);
         self
     }
 }
