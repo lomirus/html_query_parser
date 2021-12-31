@@ -16,8 +16,8 @@ enum SelectorPos {
 
 impl Selector {
     /// The `selector` only supports type selector, ID selector and class selector.
-    /// 
-    /// For example, `div#app`, `span` would be ok, but `.container > div`, 
+    ///
+    /// For example, `div#app`, `span` would be ok, but `.container > div`,
     /// `#app *` would get unexpected results.
     pub fn from(selector: &str) -> Self {
         let selector_chars = selector.trim().chars();
@@ -62,6 +62,47 @@ impl Selector {
         }
         selector
     }
+
+    /// Check if the `node` matches the `selector`.
+    pub fn matches(&self, element: &Element) -> bool {
+        let mut matches = true;
+
+        if self.tag != "" && element.name != self.tag {
+            matches = false;
+        }
+
+        if self.class != "" {
+            match element.attrs.get("class") {
+                Some(class) => {
+                    if &self.class != class {
+                        matches = false;
+                    }
+                }
+                None => {
+                    if self.class != "" {
+                        matches = false;
+                    }
+                }
+            }
+        }
+
+        if self.id != "" {
+            match element.attrs.get("id") {
+                Some(id) => {
+                    if &self.id != id {
+                        matches = false;
+                    }
+                }
+                None => {
+                    if self.id != "" {
+                        matches = false;
+                    }
+                }
+            }
+        }
+
+        matches
+    }
 }
 
 /// Implement `query()`, `query_all()` methods to `Vec<Node>` and `Element`.
@@ -72,49 +113,13 @@ pub trait Queryable {
     fn query_all(&self, selector: &Selector) -> Vec<Element>;
 }
 
-
 impl Queryable for Vec<Node> {
     fn query(&self, selector: &Selector) -> Option<Element> {
         for node in self {
             if node.is_element() {
                 let element = node.clone().try_into_element().unwrap();
-                let mut matched = true;
 
-                if selector.tag != "" && element.name != selector.tag {
-                    matched = false;
-                }
-
-                if selector.class != "" {
-                    match element.attrs.get("class") {
-                        Some(class) => {
-                            if &selector.class != class {
-                                matched = false;
-                            }
-                        }
-                        None => {
-                            if selector.class != "" {
-                                matched = false;
-                            }
-                        }
-                    }
-                }
-
-                if selector.id != "" {
-                    match element.attrs.get("id") {
-                        Some(id) => {
-                            if &selector.id != id {
-                                matched = false;
-                            }
-                        }
-                        None => {
-                            if selector.id != "" {
-                                matched = false;
-                            }
-                        }
-                    }
-                }
-                
-                if matched {
+                if selector.matches(&element) {
                     return Some(element);
                 } else {
                     if let Some(elem) = element.query(selector) {
@@ -134,35 +139,7 @@ impl Queryable for Vec<Node> {
                 let sub_elements = element.query_all(selector);
                 elements.extend(sub_elements);
                 // Check if this element matches. If so, push it to the `elements`
-                let mut matched = true;
-                if element.name != selector.tag {
-                    matched = false;
-                }
-                match element.attrs.get("class") {
-                    Some(class) => {
-                        if &selector.class != class {
-                            matched = false;
-                        }
-                    }
-                    None => {
-                        if selector.class != "" {
-                            matched = false;
-                        }
-                    }
-                }
-                match element.attrs.get("id") {
-                    Some(id) => {
-                        if &selector.id != id {
-                            matched = false;
-                        }
-                    }
-                    None => {
-                        if selector.id != "" {
-                            matched = false;
-                        }
-                    }
-                }
-                if matched {
+                if selector.matches(&element) {
                     elements.push(element);
                 }
             }
