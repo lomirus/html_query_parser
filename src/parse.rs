@@ -1,13 +1,8 @@
 mod attrs;
 mod token;
 
-use crate::Node;
+use crate::{data::VOID_TAGS, Node};
 use token::Token;
-
-const VOID_TAGS: [&str; 15] = [
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "meta", "param",
-    "source", "track", "wbr",
-];
 
 fn html_to_stack(html: &str) -> Vec<Token> {
     let mut chars_stack = Vec::<char>::new();

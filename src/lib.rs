@@ -2,6 +2,7 @@ mod edit;
 mod html;
 mod parse;
 mod query;
+mod data;
 
 use std::collections::HashMap;
 

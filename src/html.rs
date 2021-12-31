@@ -1,4 +1,4 @@
-use crate::{Element, Node};
+use crate::{data::VOID_TAGS, Element, Node};
 
 /// Implement `html()` method to `Vec<Node>`, `Element` and `Node`.
 pub trait Htmlifiable {
@@ -9,12 +9,11 @@ pub trait Htmlifiable {
 impl Htmlifiable for Element {
     fn html(&self) -> String {
         if self.attrs.len() == 0 {
-            return format!(
-                "<{}>{}</{}>",
-                self.name,
-                self.children.html(),
-                self.name
-            );
+            return if VOID_TAGS.contains(&self.name.as_str()) {
+                format!("<{}>", self.name)
+            } else {
+                format!("<{}>{}</{}>", self.name, self.children.html(), self.name)
+            };
         }
         let attrs = self
             .attrs
@@ -28,13 +27,18 @@ impl Htmlifiable for Element {
             })
             .collect::<Vec<_>>()
             .join(" ");
-        format!(
-            "<{} {}>{}</{}>",
-            self.name,
-            attrs,
-            self.children.html(),
-            self.name
-        )
+
+        if VOID_TAGS.contains(&self.name.as_str()) {
+            format!("<{} {}>", self.name, attrs,)
+        } else {
+            format!(
+                "<{} {}>{}</{}>",
+                self.name,
+                attrs,
+                self.children.html(),
+                self.name
+            )
+        }
     }
 }
 
