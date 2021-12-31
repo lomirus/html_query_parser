@@ -63,7 +63,7 @@ impl Selector {
         selector
     }
 
-    /// Check if the `node` matches the `selector`.
+    /// Check if the `element` matches the `selector`.
     pub fn matches(&self, element: &Element) -> bool {
         let mut matches = true;
 

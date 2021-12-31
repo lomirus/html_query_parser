@@ -1,17 +1,11 @@
 use crate::{Element, Node, Selector};
 
-/// Implement `trim()` method to `Vec<Node>` and `Element`.
+/// Trim or insert elements into the DOM.
 pub trait Editable {
     /// Remove all empty text nodes from `self`.
     fn trim(self) -> Self;
-    /// Insert `node` as a child in the front of all elements that matched the `selector`.
-    fn insert_before_of(&mut self, selector: Selector, node: Node);
-    /// Insert `node` as a child in the back of all elements that matched the `selector`.
-    fn insert_after_of(&mut self, selector: Selector, node: Node);
-    /// Insert `node` before all elements that matched the `selector`.
-    fn insert_before(&mut self, selector: Selector, node: Node);
-    /// Insert `node` after all elements that matched the `selector`.
-    fn insert_after(&mut self, selector: Selector, node: Node);
+    /// Insert `node` as the last child to all elements that matches the `selector`.
+    fn insert_to(&mut self, selector: &Selector, target: Node);
 }
 
 impl Editable for Vec<Node> {
@@ -39,10 +33,25 @@ impl Editable for Vec<Node> {
         }
         nodes
     }
-    fn insert_before_of(&mut self, selector: Selector, node: Node) {}
-    fn insert_after_of(&mut self, selector: Selector, node: Node) {}
-    fn insert_before(&mut self, selector: Selector, node: Node) {}
-    fn insert_after(&mut self, selector: Selector, node: Node) {}
+    fn insert_to(&mut self, selector: &Selector, target: Node) {
+        for node in self {
+            if let Node::Element {
+                name,
+                attrs,
+                children,
+            } = node
+            {
+                children.insert_to(selector, target.clone());
+                if selector.matches(&Element {
+                    name: name.clone(),
+                    attrs: attrs.clone(),
+                    children: vec![],
+                }) {
+                    children.push(target.clone());
+                }
+            }
+        }
+    }
 }
 
 impl Editable for Element {
@@ -53,8 +62,10 @@ impl Editable for Element {
             children: self.children.trim(),
         }
     }
-    fn insert_before_of(&mut self, selector: Selector, node: Node) {}
-    fn insert_after_of(&mut self, selector: Selector, node: Node) {}
-    fn insert_before(&mut self, selector: Selector, node: Node) {}
-    fn insert_after(&mut self, selector: Selector, node: Node) {}
+    fn insert_to(&mut self, selector: &Selector, target: Node) {
+        self.children.insert_to(selector, target.clone());
+        if selector.matches(self) {
+            self.children.push(target);
+        }
+    }
 }
