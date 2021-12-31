@@ -5,7 +5,7 @@ pub trait Editable {
     /// Remove all empty text nodes from `self`.
     fn trim(self) -> Self;
     /// Insert `node` as the last child to all elements that matches the `selector`.
-    fn insert_to(&mut self, selector: &Selector, target: Node);
+    fn insert_to(&mut self, selector: &Selector, target: Node) -> &mut Self;
 }
 
 impl Editable for Vec<Node> {
@@ -33,8 +33,8 @@ impl Editable for Vec<Node> {
         }
         nodes
     }
-    fn insert_to(&mut self, selector: &Selector, target: Node) {
-        for node in self {
+    fn insert_to(&mut self, selector: &Selector, target: Node) -> &mut Self {
+        for node in self.iter_mut() {
             if let Node::Element {
                 name,
                 attrs,
@@ -51,6 +51,7 @@ impl Editable for Vec<Node> {
                 }
             }
         }
+        self
     }
 }
 
@@ -62,10 +63,11 @@ impl Editable for Element {
             children: self.children.trim(),
         }
     }
-    fn insert_to(&mut self, selector: &Selector, target: Node) {
+    fn insert_to(&mut self, selector: &Selector, target: Node) -> &mut Self {
         self.children.insert_to(selector, target.clone());
         if selector.matches(self) {
             self.children.push(target);
         }
+        self
     }
 }
