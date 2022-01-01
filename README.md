@@ -1,3 +1,9 @@
+## Warning
+
+This repository has been deprecated, please use the [html-editor](https://github.com/lomirus/html-editor) instead.
+
+If you want to have the ownership of this crate name, please contact me at <lomirus@qq.com> so I can transfer it to you.
+
 [![Crates.io](https://img.shields.io/crates/v/html_query_parser)](https://crates.io/crates/html_query_parser)
 
 # HTML Query Parser
