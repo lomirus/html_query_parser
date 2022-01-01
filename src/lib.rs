@@ -33,10 +33,6 @@ impl Node {
         }
     }
 
-    fn try_element(&self) -> Result<Element, &'static str> {
-        self.clone().try_into_element()
-    }
-
     /// Try to convert the node into an element.
     pub fn try_into_element(self) -> Result<Element, &'static str> {
         match self {
