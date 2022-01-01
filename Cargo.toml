@@ -1,6 +1,6 @@
 [package]
 name = "html_query_parser"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 authors = ["Lomirus"]
 description = "Pure, simple and elegant HTML parser and query selector."
