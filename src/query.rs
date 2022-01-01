@@ -83,19 +83,13 @@ impl Selector {
     /// Check if the `element` matches the `selector`.
     /// 
     /// ```
-    /// use std::collections::HashMap;
     /// use html_query_parser::{Node, Element, Selector, Htmlifiable};
     /// 
-    /// let mut attrs = HashMap::new();
-    /// attrs.insert("id".to_string(), "app".to_string());
-    /// 
-    /// let element: Element = Element {
-    ///     name: "div".to_string(),
-    ///     attrs: attrs,
-    ///     children: vec![
-    ///         Node::Text("Hello World!".to_string())
-    ///     ]
-    /// };
+    /// let element: Element = Element::new(
+    ///     "div",
+    ///     vec![("id", "app")],
+    ///     vec![Node::Text("Hello World!".to_string())],
+    /// );
     /// 
     /// let selector = Selector::from("div#app");
     /// 

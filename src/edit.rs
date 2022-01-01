@@ -21,18 +21,17 @@ pub trait Editable {
     /// Insert `node` as the last child to all elements that matches the `selector`.
     /// 
     /// ```
-    /// use std::collections::HashMap;
     /// use html_query_parser::{parse, Node, Selector, Editable, Htmlifiable};
     ///
     /// let html = r#"<div><span>Ok</span></div>"#;
     /// 
     /// let selector = Selector::from("div");
     /// let html = parse(html)
-    ///     .insert_to(&selector, Node::Element {
-    ///         name: "span".to_string(),
-    ///         attrs: HashMap::new(),
-    ///         children: vec![Node::Text("Cancel".to_string())]
-    ///     })
+    ///     .insert_to(&selector, Node::new_element(
+    ///         "span",
+    ///         vec![],
+    ///         vec![Node::Text("Cancel".to_string())]
+    ///     ))
     ///     .html();
     /// assert_eq!(html, r#"<div><span>Ok</span><span>Cancel</span></div>"#)
     /// ```
@@ -42,7 +41,8 @@ pub trait Editable {
     /// ```
     /// use html_query_parser::{parse, Selector, Editable, Htmlifiable};
     ///
-    /// let html = r#"<div>
+    /// let html = r#"
+    /// <div>
     ///     <div class="recommend"></div>
     ///     <div class="results"></div>
     ///     <div class="ad"></div>
@@ -50,7 +50,8 @@ pub trait Editable {
     /// 
     /// let selector = Selector::from(".ad");
     /// let html = parse(html).remove_by(&selector).html();
-    /// assert_eq!(html, r#"<div>
+    /// assert_eq!(html, r#"
+    /// <div>
     ///     <div class="recommend"></div>
     ///     <div class="results"></div>
     ///    

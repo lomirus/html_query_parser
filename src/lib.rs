@@ -25,7 +25,7 @@ pub enum Node {
 }
 
 impl Node {
-    /// Check if it is a element node.
+    /// Check if it is an element node.
     pub fn is_element(&self) -> bool {
         match self {
             Node::Element { .. } => true,
@@ -52,6 +52,15 @@ impl Node {
             _ => Err("not an element"),
         }
     }
+
+    /// Create a new element node.
+    pub fn new_element(name: &str, attrs: Vec<(&str, &str)>, children: Vec<Node>) -> Node {
+        Node::Element {
+            name: name.to_string(),
+            attrs: attrs.into_iter().map(|(k, v)| (k.to_string(), v.to_string())).collect(),
+            children,
+        }
+    }
 }
 
 /// HTML Element
@@ -60,4 +69,15 @@ pub struct Element {
     pub name: String,
     pub attrs: HashMap<String, String>,
     pub children: Vec<Node>,
+}
+
+impl Element {
+    /// Create a new element.
+    pub fn new(name: &str, attrs: Vec<(&str, &str)>, children: Vec<Node>) -> Self {
+        Self {
+            name: name.to_string(),
+            attrs: attrs.into_iter().map(|(k, v)| (k.to_string(), v.to_string())).collect(),
+            children,
+        }
+    }
 }

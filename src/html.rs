@@ -5,19 +5,15 @@ pub trait Htmlifiable {
     /// Convert the object to html string.
     /// 
     /// ```
-    /// use std::collections::HashMap;
     /// use html_query_parser::{Node, Element, Htmlifiable};
     /// 
-    /// let mut attrs = HashMap::new();
-    /// attrs.insert("class".to_string(), "info".to_string());
-    /// 
-    /// let node: Node = Node::Element {
-    ///     name: "span".to_string(),
-    ///     attrs: attrs,
-    ///     children: vec![
+    /// let node: Node = Node::new_element(
+    ///     "span",
+    ///     vec![("class", "info")],
+    ///     vec![
     ///         Node::Text("Hello World!".to_string())
     ///     ]
-    /// };
+    /// );
     /// assert_eq!(node.html(), r#"<span class="info">Hello World!</span>"#);
     /// 
     /// let nodes: Vec<Node> = vec![node.clone()];
