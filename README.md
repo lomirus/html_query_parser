@@ -63,3 +63,9 @@ let a: String = parse(html).trim().html();
 let b: String = parse(html).insert_to(&selector, node).html();
 let c: String = parse(html).remove_by(&selector).html();
 ```
+
+You can find more examples in the [documentation](https://docs.rs/html_query_parser/latest/html_query_parser/).
+
+## Changelog
+
+See in [CHANGELOG.md](CHANGELOG.md)
