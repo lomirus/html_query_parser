@@ -9,8 +9,6 @@ Pure, simple and elegant HTML parser and query selector.
 ### Parse HTML segment/document
 
 ```rust
-use html_query_parser::parse;
-
 let document = parse("<!doctype html><html><head></head><body></body></html>");
 println!("{:#?}", document);
 ```
@@ -42,52 +40,26 @@ Output:
 ### Query an element by classname
 
 ```rust
-use html_query_parser::{parse, Queryable, Selector};
-
-let html = r#"
-    <div>
-        <span>Hello</span>
-        <span>World</span>
-        <div class="last">Last Element</div>
-    </div>"#;
+// let html = r#"..."#
 let nodes = parse(html);
-let selector = Selector::from(".last");
-let element = nodes.query(&selector).unwrap();
+let selector: Selector = Selector::from(".last");
+let element: Element = nodes.query(&selector).unwrap();
 ```
 
 ### Query all elements by tag
 
 ```rust
-use html_query_parser::{parse, Queryable, Selector};
-
-let html = r#"
-    <div>
-        <span>Hello</span>
-        <span>World</span>
-        <div class="last">Last Element</div>
-    </div>"#;
+// let html = r#"..."#
 let nodes = parse(html);
-let selector = Selector::from("span");
-let elements = nodes.query_all(&selector);
+let selector: Selector = Selector::from("span");
+let elements: Vec<Element> = nodes.query_all(&selector);
 ```
 
 ### Edit the HTML
 
 ```rust
-use html_query_parser::{parse, Trimable, Htmlifiable};
-
-let html = r#"
-    <div>
-        <span>Hello</span>
-        <span>World</span>
-        <div class="last">Last Element</div>
-    </div>"#;
-let html = parse(html).trim().html();
-println!("{}", html);
-```
-
-Output:
-
-```log
-<div><span>Hello</span><span>World</span><div class="last">Last Element</div></div>
+// let html = r#"..."#
+let a: String = parse(html).trim().html();
+let b: String = parse(html).insert_to(&selector, node).html();
+let c: String = parse(html).remove_by(&selector).html();
 ```
