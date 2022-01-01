@@ -1,3 +1,10 @@
+## v0.3.0 (2022-01-01)
+
+- Feat: Add `insert_to`, `remove_by` methods;
+- Feat: Add `matches` method for selector;
+- Fix: the end tag of void tags will be attached when converted to html code;
+- Docs: More detailed documentation and examples.
+
 ## v0.2.1 (2021-12-27)
 
 - Fix some documentation problems
