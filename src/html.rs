@@ -1,8 +1,31 @@
 use crate::{data::VOID_TAGS, Element, Node};
 
-/// Implement `html()` method to `Vec<Node>`, `Element` and `Node`.
+/// Used to be converted to html string
 pub trait Htmlifiable {
     /// Convert the object to html string.
+    /// 
+    /// ```
+    /// use std::collections::HashMap;
+    /// use html_query_parser::{Node, Element, Htmlifiable};
+    /// 
+    /// let mut attrs = HashMap::new();
+    /// attrs.insert("class".to_string(), "info".to_string());
+    /// 
+    /// let node: Node = Node::Element {
+    ///     name: "span".to_string(),
+    ///     attrs: attrs,
+    ///     children: vec![
+    ///         Node::Text("Hello World!".to_string())
+    ///     ]
+    /// };
+    /// assert_eq!(node.html(), r#"<span class="info">Hello World!</span>"#);
+    /// 
+    /// let nodes: Vec<Node> = vec![node.clone()];
+    /// assert_eq!(nodes.html(), r#"<span class="info">Hello World!</span>"#);
+    /// 
+    /// let element: Element = node.try_into_element().unwrap();
+    /// assert_eq!(element.html(), r#"<span class="info">Hello World!</span>"#);
+    /// ```
     fn html(&self) -> String;
 }
 

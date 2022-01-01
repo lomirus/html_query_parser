@@ -11,6 +11,7 @@ pub use html::Htmlifiable;
 pub use parse::parse;
 pub use query::{Queryable, Selector};
 
+/// Basic node of dom
 #[derive(Debug, Clone)]
 pub enum Node {
     Element {
@@ -24,6 +25,7 @@ pub enum Node {
 }
 
 impl Node {
+    /// Check if it is a element node.
     pub fn is_element(&self) -> bool {
         match self {
             Node::Element { .. } => true,
@@ -35,6 +37,7 @@ impl Node {
         self.clone().try_into_element()
     }
 
+    /// Try to convert the node into an element.
     pub fn try_into_element(self) -> Result<Element, &'static str> {
         match self {
             Node::Element {
@@ -51,6 +54,7 @@ impl Node {
     }
 }
 
+/// HTML Element
 #[derive(Debug)]
 pub struct Element {
     pub name: String,

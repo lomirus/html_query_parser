@@ -1,6 +1,6 @@
 use crate::{Element, Node};
 
-/// Used in `query()` and `query_all()` methods.
+/// Simple query selector
 #[derive(Debug)]
 pub struct Selector {
     class: String,
@@ -19,6 +19,23 @@ impl Selector {
     ///
     /// For example, `div#app`, `span` would be ok, but `.container > div`,
     /// `#app *` would get unexpected results.
+    /// 
+    /// ```
+    /// use html_query_parser::Selector;
+    /// 
+    /// // Ok: Simple tag, class and ID selectors.
+    /// let selector = Selector::from("span");
+    /// let selector = Selector::from(".class");
+    /// let selector = Selector::from("#id");
+    /// 
+    /// // Ok: Mixed selector
+    /// let selector = Selector::from("div#app");
+    /// let selector = Selector::from("span.info#first");
+    /// 
+    /// // Disallowed
+    /// let selector = Selector::from("div span");
+    /// let selector = Selector::from("a[target=_blank]");
+    /// ```
     pub fn from(selector: &str) -> Self {
         let selector_chars = selector.trim().chars();
         let mut chars_stack = Vec::<char>::new();
@@ -64,6 +81,26 @@ impl Selector {
     }
 
     /// Check if the `element` matches the `selector`.
+    /// 
+    /// ```
+    /// use std::collections::HashMap;
+    /// use html_query_parser::{Node, Element, Selector, Htmlifiable};
+    /// 
+    /// let mut attrs = HashMap::new();
+    /// attrs.insert("id".to_string(), "app".to_string());
+    /// 
+    /// let element: Element = Element {
+    ///     name: "div".to_string(),
+    ///     attrs: attrs,
+    ///     children: vec![
+    ///         Node::Text("Hello World!".to_string())
+    ///     ]
+    /// };
+    /// 
+    /// let selector = Selector::from("div#app");
+    /// 
+    /// assert_eq!(selector.matches(&element), true);
+    /// ```
     pub fn matches(&self, element: &Element) -> bool {
         let mut matches = true;
 
@@ -105,11 +142,51 @@ impl Selector {
     }
 }
 
-/// Implement `query()`, `query_all()` methods to `Vec<Node>` and `Element`.
+/// Used to `query()` or `query_all()` with `Selector`
 pub trait Queryable {
     /// Query the node in `self` for the given selector.
+    ///
+    /// ```
+    /// use html_query_parser::{parse, Element, Selector, Queryable};
+    ///
+    /// let html = r#"
+    ///     <!DOCTYPE html>
+    ///     <html lang="en">
+    ///     <head>
+    ///         <meta charset="UTF-8">
+    ///         <title>App</title>
+    ///     </head>
+    ///     <body>
+    ///         <div id="app"></div>
+    ///     </body>
+    ///     </html>"#;
+    /// 
+    /// let selector: Selector = Selector::from("#app");
+    /// let app: Element = parse(html).query(&selector).unwrap();
+    /// ```
     fn query(&self, selector: &Selector) -> Option<Element>;
     /// Query all the nodes in `self` for the given selector.
+    /// 
+    /// ```
+    /// use html_query_parser::{parse, Element, Selector, Queryable};
+    ///
+    /// let html = r#"
+    ///     <!DOCTYPE html>
+    ///     <html lang="en">
+    ///     <head>
+    ///         <meta charset="UTF-8">
+    ///         <title>App</title>
+    ///     </head>
+    ///     <body>
+    ///         <span class="btn">Ok</span>
+    ///         <span class="btn">Cancel</span>
+    ///         <span class="btn">Remind Me Later</span>
+    ///     </body>
+    ///     </html>"#;
+    /// 
+    /// let selector: Selector = Selector::from(".btn");
+    /// let app: Vec<Element> = parse(html).query_all(&selector);
+    /// ```
     fn query_all(&self, selector: &Selector) -> Vec<Element>;
 }
 

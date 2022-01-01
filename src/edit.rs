@@ -1,12 +1,61 @@
 use crate::{Element, Node, Selector};
 
-/// Insert or remove elements by `Selector`, and trim the dom.
+/// Used to insert or remove elements by `Selector`, and trim the dom.
 pub trait Editable {
     /// Remove all empty text nodes from `self`.
+    /// 
+    /// ```
+    /// use html_query_parser::{parse, Editable, Htmlifiable};
+    ///
+    /// let html = r#"
+    ///     <!DOCTYPE html>
+    ///     <html>
+    ///         <head></head>
+    ///         <body></body>
+    ///     </html>"#;
+    /// 
+    /// let html = parse(html).trim().html();
+    /// assert_eq!(html, r#"<!DOCTYPE html><html><head></head><body></body></html>"#)
+    /// ```
     fn trim(self) -> Self;
     /// Insert `node` as the last child to all elements that matches the `selector`.
+    /// 
+    /// ```
+    /// use std::collections::HashMap;
+    /// use html_query_parser::{parse, Node, Selector, Editable, Htmlifiable};
+    ///
+    /// let html = r#"<div><span>Ok</span></div>"#;
+    /// 
+    /// let selector = Selector::from("div");
+    /// let html = parse(html)
+    ///     .insert_to(&selector, Node::Element {
+    ///         name: "span".to_string(),
+    ///         attrs: HashMap::new(),
+    ///         children: vec![Node::Text("Cancel".to_string())]
+    ///     })
+    ///     .html();
+    /// assert_eq!(html, r#"<div><span>Ok</span><span>Cancel</span></div>"#)
+    /// ```
     fn insert_to(&mut self, selector: &Selector, target: Node) -> &mut Self;
     /// Remove all elements that matches the `selector`.
+    /// 
+    /// ```
+    /// use html_query_parser::{parse, Selector, Editable, Htmlifiable};
+    ///
+    /// let html = r#"<div>
+    ///     <div class="recommend"></div>
+    ///     <div class="results"></div>
+    ///     <div class="ad"></div>
+    /// </div>"#;
+    /// 
+    /// let selector = Selector::from(".ad");
+    /// let html = parse(html).remove_by(&selector).html();
+    /// assert_eq!(html, r#"<div>
+    ///     <div class="recommend"></div>
+    ///     <div class="results"></div>
+    ///    
+    /// </div>"#)
+    /// ```
     fn remove_by(&mut self, selector: &Selector) -> &mut Self;
 }
 
